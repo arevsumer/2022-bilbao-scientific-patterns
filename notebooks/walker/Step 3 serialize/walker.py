@@ -1,5 +1,6 @@
 import numpy as np
 import matplotlib.pyplot as plt
+import json 
 
 
 class Walker:
@@ -12,6 +13,23 @@ class Walker:
         self.context_map = context_map
         # Pre-compute a 2D grid of coordinates for efficiency
         self._grid_ii, self._grid_jj = np.mgrid[0:size, 0:size]
+    
+    @classmethod
+    def from_json(cls, path):
+        with open(path, 'r') as f:
+            inputs = json.load(f)
+        map = np.load(inputs["context_map_path"])
+        inputs["context_map"] = map
+        del inputs["context_map_path"]
+        return cls(**inputs)
+
+    def to_json(self, path="initial.json", context_map_path="initial_context_map.npy"):
+        with open(path, 'w') as f:
+            serialize_dict = {"sigma_i": self.sigma_i, "sigma_j": self.sigma_j, 
+            "size": self.size, "context_map_path": context_map_path}
+            json.dump(serialize_dict, f) 
+            # TODO: save .npy file with data!
+        return path
 
     @classmethod
     def from_context_map_type(cls, sigma_i, sigma_j, size, map_type):
